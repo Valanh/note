@@ -15,7 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.util.Timer;
+
+import java.util.Objects;
 
 import lanhtv.adroid.note.daos.Dao_note;
 import lanhtv.adroid.note.database.DatabaseRoom;
@@ -28,8 +29,6 @@ public class DetailNoteActivity extends AppCompatActivity {
     ImageView back;
     RelativeLayout sc;
 
-    private Timer timer = new Timer();
-    private final long DELAY = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,40 +38,31 @@ public class DetailNoteActivity extends AppCompatActivity {
         String uid = intent.getStringExtra("uid");
 
         Dao_note dao_note = DatabaseRoom.getInstance(this).Dao();
-        Note note = new Note();
+        Note note;
         note = dao_note.findByUid(Integer.parseInt(uid));
 
         finID();
         title_tv.setText(note.title);
         content.setText(note.content);
-        sc.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                edit.setText("Done");
-                content.requestFocus();
-                content.setSelection(content.getText().length());
-            }
+        sc.setOnClickListener(view -> {
+            edit.setText("Done");
+            content.requestFocus();
+            content.setSelection(content.getText().length());
         });
 
-        edit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (content.hasFocus()) {
-                    content.clearFocus();
-                    edit.setText("Edit");
-                    dao_note.updateContentNoteByUid(Integer.parseInt(uid), content.getText().toString());
-                } else {
-                    showDialog(dao_note, title_tv.getText().toString(), Integer.parseInt(uid));
-                }
+        edit.setOnClickListener(view -> {
+            if (content.hasFocus()) {
+                content.clearFocus();
+                edit.setText("Edit");
+                dao_note.updateContentNoteByUid(Integer.parseInt(uid), content.getText().toString());
+            } else {
+                showDialog(dao_note, title_tv.getText().toString(), Integer.parseInt(uid));
             }
         });
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-                Intent intent = new Intent(DetailNoteActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
+        back.setOnClickListener(view -> {
+            finish();
+            Intent intent1 = new Intent(DetailNoteActivity.this, MainActivity.class);
+            startActivity(intent1);
         });
     }
 
@@ -106,19 +96,14 @@ public class DetailNoteActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Note note = new Note();
-                note.title = etInput.getText().toString();
+                note.title = Objects.requireNonNull(etInput.getText()).toString();
                 dao.updateTitleNoteByUid(uid, note.title);
                 title_tv.setText(note.title);
                 dialog.dismiss();
             }
         });
         // Xử lý sự kiện khi nhấn nút Cancel
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
         // Hiển thị dialog
         dialog.show();
     }

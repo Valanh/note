@@ -2,16 +2,11 @@ package lanhtv.adroid.note;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,6 +17,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import lanhtv.adroid.note.adapters.AdapterNote;
 import lanhtv.adroid.note.daos.Dao_note;
@@ -33,12 +29,10 @@ import lanhtv.adroid.note.model.Note;
 public class MainActivity extends AppCompatActivity implements Deletenote, OpenNoteDetail {
 
     FloatingActionButton add_note;
-    TextInputEditText search_note;
     RecyclerView listView;
 
     private List<Note> noteList;
     private AdapterNote adapter;
-    Context context = this;
 
 
     @Override
@@ -49,31 +43,11 @@ public class MainActivity extends AppCompatActivity implements Deletenote, OpenN
         dao_note = DatabaseRoom.getInstance(this).Dao();
         findID();
 
-        //tìm kiếm
-        search_note.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
-
         // thêm note
-        add_note.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDialog(dao_note);
-            }
-        });
-        noteList = new ArrayList<Note>();
+        add_note.setOnClickListener(view -> showDialog(dao_note));
+        noteList = new ArrayList<>();
         listView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new AdapterNote(this, this::deleteNote,this::OpenNoteDetail);
+        adapter = new AdapterNote(this, this,this);
         noteList = dao_note.getAllNotes();
         adapter.setData(noteList);
         listView.setAdapter(adapter);
@@ -82,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements Deletenote, OpenN
     void findID() {
         // ánh xạ biến
         add_note = findViewById(R.id.but_add_note);
-        search_note = findViewById(R.id.input_text_search);
         listView = findViewById(R.id.list_view_note);
     }
 
@@ -96,28 +69,19 @@ public class MainActivity extends AppCompatActivity implements Deletenote, OpenN
         // Tạo dialog từ builder
         AlertDialog dialog = builder.create();
         // Lấy các view từ dialog layout
-        TextView tvTitle = dialogView.findViewById(R.id.tvTitle);
         TextInputEditText etInput = dialogView.findViewById(R.id.etInput);
         Button btnOk = dialogView.findViewById(R.id.btnOk);
         Button btnCancel = dialogView.findViewById(R.id.btnCancel);
         // Xử lý sự kiện khi nhấn nút OK
-        btnOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Note note = new Note();
-                note.title = etInput.getText().toString();
-                dao.insert(note);
-                resfresh(dao);
-                dialog.dismiss();
-            }
+        btnOk.setOnClickListener(v -> {
+            Note note = new Note();
+            note.title = Objects.requireNonNull(etInput.getText()).toString();
+            dao.insert(note);
+            resfresh(dao);
+            dialog.dismiss();
         });
         // Xử lý sự kiện khi nhấn nút Cancel
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
         // Hiển thị dialog
         dialog.show();
     }
@@ -127,19 +91,12 @@ public class MainActivity extends AppCompatActivity implements Deletenote, OpenN
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Xóa note")
                 .setMessage("Bạn có chắc muốn xóa")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Dao_note dao_note = DatabaseRoom.getInstance(context).Dao();
-                        dao_note.delete(note);
-                        resfresh(dao_note);
-                        dialog.dismiss(); // Đóng dialog
-                    }
-                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int i) {
-                        dialog.dismiss();
-                    }
-                });
+                .setPositiveButton("OK", (dialog, id) -> {
+                    Dao_note dao_note = DatabaseRoom.getInstance(context).Dao();
+                    dao_note.delete(note);
+                    resfresh(dao_note);
+                    dialog.dismiss(); // Đóng dialog
+                }).setNegativeButton("No", (dialog, i) -> dialog.dismiss());
         AlertDialog dialog = builder.create();
         dialog.show();
     }

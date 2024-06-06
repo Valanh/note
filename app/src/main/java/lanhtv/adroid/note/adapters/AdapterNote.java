@@ -1,12 +1,12 @@
 package lanhtv.adroid.note.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,10 +20,10 @@ import lanhtv.adroid.note.model.Note;
 public class AdapterNote extends RecyclerView.Adapter<AdapterNote.noteViewHolder>  {
 
 
-    private Context context;
+    private final Context context;
     private List<Note> list;
-    private Deletenote deletenote;
-    private OpenNoteDetail openNoteDetail;
+    private final Deletenote deletenote;
+    private final OpenNoteDetail openNoteDetail;
 
     public AdapterNote(Context context,Deletenote deletenote,OpenNoteDetail openNoteDetail) {
         this.context = context;
@@ -31,6 +31,7 @@ public class AdapterNote extends RecyclerView.Adapter<AdapterNote.noteViewHolder
         this.openNoteDetail = openNoteDetail;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setData(List<Note> list) {
         this.list = list;
         notifyDataSetChanged();
@@ -50,18 +51,8 @@ public class AdapterNote extends RecyclerView.Adapter<AdapterNote.noteViewHolder
         if(note == null)return;
 
         holder.title.setText(note.title);
-        holder.delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deletenote.deleteNote(note,view.getContext());
-            }
-        });
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openNoteDetail.OpenNoteDetail(note);
-            }
-        });
+        holder.delete.setOnClickListener(view -> deletenote.deleteNote(note,view.getContext()));
+        holder.itemView.setOnClickListener(view -> openNoteDetail.OpenNoteDetail(note));
 
     }
 
@@ -73,7 +64,7 @@ public class AdapterNote extends RecyclerView.Adapter<AdapterNote.noteViewHolder
         return 0;
     }
 
-    public class noteViewHolder extends RecyclerView.ViewHolder{
+    public static class noteViewHolder extends RecyclerView.ViewHolder{
         TextView title;
         ImageView delete;
         public noteViewHolder(@NonNull View itemView) {
