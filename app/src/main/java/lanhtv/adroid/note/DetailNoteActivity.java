@@ -1,10 +1,12 @@
 package lanhtv.adroid.note;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -59,6 +61,7 @@ public class DetailNoteActivity extends AppCompatActivity {
 
         edit.setOnClickListener(view -> {
             if (content.hasFocus()) {
+                hideSoftKeyboard(this);
                 content.clearFocus();
                 dao_note.updateContentNoteByUid(Integer.parseInt(uid), content.getText().toString());
             } else {
@@ -110,5 +113,14 @@ public class DetailNoteActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         // Hiển thị dialog
         dialog.show();
+    }
+
+    public void hideSoftKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }
