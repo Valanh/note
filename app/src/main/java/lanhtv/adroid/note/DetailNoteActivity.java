@@ -45,20 +45,27 @@ public class DetailNoteActivity extends AppCompatActivity {
         title_tv.setText(note.title);
         content.setText(note.content);
         sc.setOnClickListener(view -> {
-            edit.setText("Done");
             content.requestFocus();
             content.setSelection(content.getText().length());
+        });
+
+        content.setOnFocusChangeListener((view, b) -> {
+            if (content.hasFocus()){
+                edit.setText("Done");
+            }else {
+                edit.setText("Edit");
+            }
         });
 
         edit.setOnClickListener(view -> {
             if (content.hasFocus()) {
                 content.clearFocus();
-                edit.setText("Edit");
                 dao_note.updateContentNoteByUid(Integer.parseInt(uid), content.getText().toString());
             } else {
                 showDialog(dao_note, title_tv.getText().toString(), Integer.parseInt(uid));
             }
         });
+
         back.setOnClickListener(view -> {
             finish();
             Intent intent1 = new Intent(DetailNoteActivity.this, MainActivity.class);
@@ -92,15 +99,12 @@ public class DetailNoteActivity extends AppCompatActivity {
         tvTitle.setText("Sửa tiêu đề");
         etInput.setText(title);
         // Xử lý sự kiện khi nhấn nút OK
-        btnOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Note note = new Note();
-                note.title = Objects.requireNonNull(etInput.getText()).toString();
-                dao.updateTitleNoteByUid(uid, note.title);
-                title_tv.setText(note.title);
-                dialog.dismiss();
-            }
+        btnOk.setOnClickListener(v -> {
+            Note note = new Note();
+            note.title = Objects.requireNonNull(etInput.getText()).toString();
+            dao.updateTitleNoteByUid(uid, note.title);
+            title_tv.setText(note.title);
+            dialog.dismiss();
         });
         // Xử lý sự kiện khi nhấn nút Cancel
         btnCancel.setOnClickListener(v -> dialog.dismiss());
